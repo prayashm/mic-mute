@@ -1,0 +1,48 @@
+#!/bin/bash
+# Build and install mic-mute for the current user. Safe to re-run after editing anything in src/.
+#   MIC="Your Mic Name" script/build   # first run; the name is saved to ~/.config/mic-mute/mic
+set -euo pipefail
+cd "$(dirname "$0")/../src"
+
+conf=~/.config/mic-mute/mic
+MIC="${MIC:-$(cat "$conf" 2>/dev/null || true)}"
+if [ -z "$MIC" ]; then
+  echo "Set MIC to your microphone's name, e.g. MIC=\"RØDE VideoMic GO II\" script/build. Input devices:" >&2
+  system_profiler SPAudioDataType | awk '/^        [^ ].*:$/{d=$0} /Input Channels/{sub(/^ +/,"",d); sub(/:$/,"",d); print "  " d}' >&2
+  exit 1
+fi
+SOX=$(command -v sox) || { echo "sox not found: brew install sox" >&2; exit 1; }
+command -v swiftc >/dev/null || { echo "swiftc not found: xcode-select --install" >&2; exit 1; }
+[ -d "/Library/Audio/Plug-Ins/HAL/BlackHole2ch.driver" ] || echo "warning: BlackHole 2ch not installed: brew install --cask blackhole-2ch" >&2
+mkdir -p "$(dirname "$conf")" && printf '%s\n' "$MIC" > "$conf"
+
+fill() { sed -e "s#__HOME__#$HOME#g" -e "s#__SOX__#$SOX#g" -e "s#__MIC__#$MIC#g" "$1"; }
+
+mkdir -p ~/.local/bin ~/.local/share/mictoggle ~/Applications ~/Library/LaunchAgents
+for t in bhvol micvad mutedtoast; do swiftc -O -o ~/.local/bin/$t $t.swift; done
+fill micwatch > ~/.local/bin/micwatch && chmod 755 ~/.local/bin/micwatch
+cp chimes/*.wav meetbounds.applescript ~/.local/share/mictoggle/
+
+app=~/Applications/MicToggle.app
+osacompile -o "$app" MicToggle.applescript
+defaults write "$app/Contents/Info.plist" LSUIElement -bool true   # no Dock icon
+plutil -convert xml1 "$app/Contents/Info.plist"
+codesign --force --deep -s - "$app"   # the plist edit breaks osacompile's ad hoc signature
+codesign -v "$app"
+
+# Launch agents: (re)load only when the rendered plist changed, so a rebuild doesn't drop live audio.
+for src in launchagents/*.plist; do
+  label=$(basename "$src" .plist); dst=~/Library/LaunchAgents/$label.plist
+  if ! fill "$src" | cmp -s - "$dst"; then
+    launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
+    fill "$src" > "$dst"
+    launchctl bootstrap "gui/$(id -u)" "$dst"
+    echo "loaded $label"
+  fi
+done
+
+# SwiftBar menu bar icon (optional)
+plugins=$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)
+if [ -n "$plugins" ]; then cp swiftbar/mic.10s.sh "$plugins/" && chmod 755 "$plugins/mic.10s.sh"; else echo "SwiftBar not set up; skipped the menu bar icon" >&2; fi
+
+echo "built for mic: $MIC"

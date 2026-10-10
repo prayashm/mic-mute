@@ -1,0 +1,27 @@
+#!/bin/bash
+# Talking-while-muted alert. launchd (local.mic-mute.watch) runs this only while /tmp/mic_muted exists.
+# __SOX__ and __MIC__ are filled in by script/build.
+# Opens the mic only while a call is reading BlackHole (Meet/Zoom/Granola); the bridge is stopped while muted,
+# so "BlackHole in use" means a meeting app has it open. Nothing is transcribed or stored: micvad only scores "speech".
+MIN_CONF=0.6   # calibration knobs: raise MIN_CONF / IN_A_ROW if it fires on non-speech, lower if it misses you
+IN_A_ROW=2     # consecutive 1 s windows (50% overlap), so ~1.5 s of talking
+BIN=$HOME/.local/bin
+BH=$BIN/bhvol
+active() { [ -e /tmp/mic_muted ] && $BH inuse; }
+
+until active; do [ -e /tmp/mic_muted ] || exit 0; sleep 3; done   # idle: mic stays closed
+
+__SOX__ -q -t coreaudio "__MIC__" -t raw -r 16000 -c 1 -e float -b 32 - \
+  | $BIN/micvad $MIN_CONF $IN_A_ROW >/dev/null &
+pipe=$!
+while kill -0 $pipe 2>/dev/null; do
+  active || { pkill -P $$ sox; kill $pipe 2>/dev/null; exit 0; }   # call ended or unmuted: close the mic
+  sleep 2
+done
+wait $pipe || exit 1
+active || exit 0
+echo "$(date +%T) talking while muted" >> /tmp/mictoggle.log
+# foreground on purpose: launchd kills background children when this script exits
+# HUD centred on the Meet window if there is one, plus a fixed spot on other screens
+$BIN/mutedtoast $(/usr/bin/osascript $HOME/.local/share/mictoggle/meetbounds.applescript 2>/dev/null)
+sleep 12   # cooldown before the next warning

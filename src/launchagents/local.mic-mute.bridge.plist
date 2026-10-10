@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template: script/build fills in __SOX__ and __MIC__. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>local.mic-mute.bridge</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>__SOX__</string><string>-q</string>
+		<string>-t</string><string>coreaudio</string><string>__MIC__</string>
+		<string>-t</string><string>coreaudio</string><string>BlackHole 2ch</string>
+		<string>remix</string><string>1</string><string>1</string>
+	</array>
+	<!-- runs unless /tmp/mic_muted exists; MicToggle creates/removes it. No RunAtLoad: it would start the bridge while muted. -->
+	<key>KeepAlive</key>
+	<dict><key>PathState</key><dict><key>/tmp/mic_muted</key><false/></dict></dict>
+	<key>ThrottleInterval</key><integer>5</integer>
+	<key>StandardErrorPath</key><string>/tmp/mic-mute-bridge.log</string>
+</dict>
+</plist>

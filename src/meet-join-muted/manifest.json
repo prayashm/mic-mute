@@ -1,0 +1,7 @@
+{
+  "manifest_version": 3,
+  "name": "Meet: join muted",
+  "version": "1.0",
+  "description": "Turns mic and camera off when a Meet page loads.",
+  "content_scripts": [{ "matches": ["https://meet.google.com/*"], "js": ["join-muted.js"], "run_at": "document_idle" }]
+}
