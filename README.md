@@ -4,9 +4,9 @@ A system-wide mute button for a USB mic on macOS. One press mutes Google Meet, Z
 
 Built for a RØDE VideoMic GO II on a Logitech MX Master 3S button, but any USB mic and any way of opening an app works. Agent notes are in [AGENTS.md](AGENTS.md).
 
-![The Muted HUD above Google Meet's controls](docs/muted-hud.png)
+![Demo: the mouse Back button mutes Meet and Granola, and a HUD warns when you talk while muted](docs/demo.gif)
 
-Talk while muted and a brightness-style HUD appears just above Meet's controls.
+One press of the mouse Back button mutes Meet and Granola together. Talk while muted and a HUD reminds you; Granola's transcript stays empty until you unmute.
 
 ## Why it is built this way
 
@@ -27,6 +27,8 @@ USB mic ──sox bridge──▶ BlackHole 2ch (virtual mic) ──▶ Meet / Z
 | Chime                     | Three notes falling = muted, rising = live                          |
 | "Muted" HUD               | Shown above Meet's controls (and on other screens) if you talk for ~1.5 s while muted in a call |
 | Meet join-muted extension | New Meet tabs open with mic and camera off                          |
+
+![The Muted HUD above Google Meet's controls](docs/muted-hud.png)
 
 Muting also clicks Meet's own mic button so others see you as muted, and drops BlackHole's input volume to 0. If you joined Meet muted, the next press unmutes you everywhere.
 
