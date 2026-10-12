@@ -23,7 +23,8 @@ Technical notes for agents working on mic-mute. Human overview: [README.md](READ
 ## State
 
 - Muted = `/tmp/mic_muted` exists. It clears on reboot, so boot is live.
-- MicToggle mute: touch flag, `launchctl kill TERM` the bridge, kickstart the watcher, `bhvol 0`, chime, refresh SwiftBar (`swiftbar://refreshplugin?name=mic`), click Meet's mic button to muted.
+- MicToggle mute: touch flag, `launchctl kill KILL` the bridge (a hung sox ignores TERM), kickstart the watcher, `bhvol 0`, chime, refresh SwiftBar (`swiftbar://refreshplugin?name=mic`), click Meet's mic button to muted.
+- MicToggle live: `kickstart -k` the bridge, so a hung sox (process alive, writing nothing, Meet hears silence) is replaced on every unmute.
 - MicToggle treats "Meet mic is muted" as muted too (joined muted), so the press goes live.
 - Meet's mic button: `[data-is-muted]` element whose `aria-label` matches `/microphone/i`, driven via Chrome `execute javascript`.
 

@@ -35,11 +35,11 @@ end meetMicMuted
 set uid to do shell script "id -u"
 set bridgeMuted to (do shell script "test -e /tmp/mic_muted && echo 1 || echo 0") is "1"
 if not (bridgeMuted or meetMicMuted()) then
-	do shell script "touch /tmp/mic_muted; launchctl kill TERM gui/" & uid & "/local.mic-mute.bridge; launchctl kickstart gui/" & uid & "/local.mic-mute.watch; ~/.local/bin/bhvol 0; echo \"$(date +%T) mute\" >> /tmp/mictoggle.log; afplay ~/.local/share/mictoggle/muted.wav &>/dev/null & open -g 'swiftbar://refreshplugin?name=mic'"
+	do shell script "touch /tmp/mic_muted; launchctl kill KILL gui/" & uid & "/local.mic-mute.bridge; launchctl kickstart gui/" & uid & "/local.mic-mute.watch; ~/.local/bin/bhvol 0; echo \"$(date +%T) mute\" >> /tmp/mictoggle.log; afplay ~/.local/share/mictoggle/muted.wav &>/dev/null & open -g 'swiftbar://refreshplugin?name=mic'"
 	syncMeet("true")
 	display notification "Mic muted" with title "🎙️"
 else
-	do shell script "rm -f /tmp/mic_muted; launchctl kickstart gui/" & uid & "/local.mic-mute.bridge; launchctl kill TERM gui/" & uid & "/local.mic-mute.watch; ~/.local/bin/bhvol 1; echo \"$(date +%T) live\" >> /tmp/mictoggle.log; afplay ~/.local/share/mictoggle/live.wav &>/dev/null & open -g 'swiftbar://refreshplugin?name=mic'"
+	do shell script "rm -f /tmp/mic_muted; launchctl kickstart -k gui/" & uid & "/local.mic-mute.bridge; launchctl kill TERM gui/" & uid & "/local.mic-mute.watch; ~/.local/bin/bhvol 1; echo \"$(date +%T) live\" >> /tmp/mictoggle.log; afplay ~/.local/share/mictoggle/live.wav &>/dev/null & open -g 'swiftbar://refreshplugin?name=mic'"
 	syncMeet("false")
 	display notification "Mic live" with title "🎙️"
 end if
