@@ -7,7 +7,7 @@ Technical notes for agents working on mic-mute. Human overview: [README.md](READ
 | Source (`src/`)                          | Installed at                                            | Role                                                                 |
 | ---------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
 | `MicToggle.applescript`                  | `~/Applications/MicToggle.app`                          | Toggle; bound to the mouse Back button via OpenLogi                   |
-| `bhvol.swift`                            | `~/.local/bin/bhvol`                                    | `bhvol 0..1` sets BlackHole input volume; `bhvol inuse` exits 0 if any app has BlackHole running |
+| `bhvol.swift`                            | `~/.local/bin/bhvol`                                    | `bhvol 0..1` sets BlackHole input volume; `bhvol inuse` exits 0 if any app has BlackHole running; `bhvol speakers` exits 0 if default output is speakers (built-in, DisplayPort, HDMI) |
 | `micvad.swift`                           | `~/.local/bin/micvad`                                   | stdin 16 kHz mono float32 → exits 0 on sustained speech (Apple SoundAnalysis `.version1`, label `speech`) |
 | `mutedtoast.swift`                       | `~/.local/bin/mutedtoast`                               | Silent click-through "Muted" HUD (NSVisualEffectView .hudWindow, like the brightness overlay), ~3 s; args = Meet window bounds to centre it above Meet's controls, other screens get a fixed bottom spot |
 | `micwatch`                               | `~/.local/bin/micwatch`                                 | Talking-while-muted loop (template: `__SOX__`, `__MIC__`)            |
@@ -38,6 +38,7 @@ Technical notes for agents working on mic-mute. Human overview: [README.md](READ
 - SwiftBar 2.1.1 ignores `sfcolor`; use `sfconfig=<base64 {"renderingMode":"Palette","colors":["#ff3b30"]}>`.
 - The bridge plist must not have RunAtLoad: it starts sox on load even while muted. PathState alone starts it when the flag is absent (e.g. after boot).
 - `sed` on this Mac is GNU sed: `sed -i` without `''`.
+- `micwatch` stays idle while output is on speakers: the GO II hears the far side of the call at -29..-40 dB RMS, the same as your voice, so neither SoundAnalysis nor a level threshold can tell them apart. Headphones only.
 - Speech detection tuning knobs: `MIN_CONF` (0.6) and `IN_A_ROW` (2) at the top of `micwatch`. Room noise is about -45 dB RMS, -32 dB peak.
 
 ## Rejected options

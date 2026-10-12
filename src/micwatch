@@ -7,7 +7,8 @@ MIN_CONF=0.6   # calibration knobs: raise MIN_CONF / IN_A_ROW if it fires on non
 IN_A_ROW=2     # consecutive 1 s windows (50% overlap), so ~1.5 s of talking
 BIN=$HOME/.local/bin
 BH=$BIN/bhvol
-active() { [ -e /tmp/mic_muted ] && $BH inuse; }
+# skip while output is on speakers: the mic hears the other side of the call as speech (bleed measured -29..-40 dB RMS, same as a voice)
+active() { [ -e /tmp/mic_muted ] && $BH inuse && ! $BH speakers; }
 
 until active; do [ -e /tmp/mic_muted ] || exit 0; sleep 3; done   # idle: mic stays closed
 

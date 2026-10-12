@@ -25,7 +25,7 @@ USB mic ──sox bridge──▶ BlackHole 2ch (virtual mic) ──▶ Meet / Z
 | MicToggle.app             | Toggle mute. Bind it to a mouse button, hotkey or launcher          |
 | Menu bar mic icon         | Plain = live, red slash = muted <img src="docs/menubar-muted.png" height="18" alt="muted icon">, orange = bridge down (SwiftBar) |
 | Chime                     | Three notes falling = muted, rising = live                          |
-| "Muted" HUD               | Shown above Meet's controls (and on other screens) if you talk for ~1.5 s while muted in a call |
+| "Muted" HUD               | Shown above Meet's controls (and on other screens) if you talk for ~1.5 s while muted in a call, with headphones on (on speakers the mic hears the other side) |
 | Meet join-muted extension | New Meet tabs open with mic and camera off                          |
 
 ![The Muted HUD above Google Meet's controls](docs/muted-hud.png)
